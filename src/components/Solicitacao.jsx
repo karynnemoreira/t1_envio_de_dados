@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import Api from "../Services/Api";
 import styles from "./Solicitacao.module.scss";
-
 import Motivo from "../assets/motivo.png";
 import Lixeira from "../assets/lixeira.png";
 
@@ -45,7 +45,56 @@ function Solicitacao() {
       despesa,
     };
     setDadosReembolso(dadosReembolso.concat(objetoReembolso));
+    limparCampos(); //quando eu clicar em salvar, ative a função limparCampos e limpas os inputs
   };
+
+  //FUNÇÃO PARA LIMPAR OS CAMPOS DO FORMULÁRIO (INPUTS)
+
+  const limparCampos = () => {
+    setColaborador(""),
+      setEmpresa(""),
+      setnPrestacao(""),
+      setDescricao(""),
+      setData(""),
+      setMotivo(""),
+      setTipoReembolso(""),
+      setCentroCusto(""),
+      setorOrdemInterna(""),
+      setDivisao(""),
+      setPep(""),
+      setMoeda(""),
+      setDistanciaKm(""),
+      setValorKm(""),
+      setValorFaturado(""),
+      setDespesa("");
+  };
+
+  //CRIAR UMA FUNÇÃO PARA ENVIAR OS DADOS PARA O BANCO DE DADOS
+  const [foiEnviado, setFoiEnviado] = useState(false); //Criando o estado
+
+  const enviarParaAnalise = async () => {
+    try {
+      //aqui colocamos o que queremos 'tentar' fazer
+      const response = await Api.post("/refunds/new", dadosReembolso);
+
+      console.log("Resposta da API", response);
+      alert("Reembolso solicitado com sucesso!");
+      setFoiEnviado(true);
+    } catch (error) {
+      //Se algo der ERRADO  no try, esse bloco é executado.
+      console.log("Erro ao enviar", error); //Mostra o erro se algo der errado
+    }
+  };
+
+//useEffect é como um vigia que fica observanto a variável foiEnviado
+
+useEffect(()=>{
+  if(foiEnviado){
+//Se "foiEnviado" for true, significa que o reembolso foi enviado com sucesso
+setDadosReembolso([])/ //Volte ao estado inicial
+setFoiEnviado(false)// Isso é uma segurança para o hook useEffect para que ele não fique rodando toda hora.
+  }
+}, [foiEnviado]  )
 
   return (
     <>
@@ -169,7 +218,7 @@ function Solicitacao() {
               <label htmlFor="pep">PEP</label>
               <input
                 name="pep"
-                type="text"
+                type="number"
                 value={pep}
                 onChange={(e) => setPep(e.target.value)}
               />
@@ -193,7 +242,7 @@ function Solicitacao() {
               <label htmlFor="distancia">Dist. / Km</label>
               <input
                 name="distanciaKm"
-                type="text"
+                type="number"
                 value={distanciaKm}
                 onChange={(e) => setDistanciaKm(e.target.value)}
               />
@@ -203,7 +252,7 @@ function Solicitacao() {
               <label htmlFor="valor">Valor / Km</label>
               <input
                 name="valorKm"
-                type="text"
+                type="number"
                 value={valorKm}
                 onChange={(e) => setValorKm(e.target.value)}
               />
@@ -212,7 +261,7 @@ function Solicitacao() {
             <div>
               <label htmlFor="faturado"> Val. Faturado </label>
               <input
-                type="text"
+                type="number"
                 name="valorFaturado"
                 value={valorFaturado}
                 onChange={(e) => setValorFaturado(e.target.value)}
@@ -222,7 +271,7 @@ function Solicitacao() {
             <div>
               <label htmlFor="taxa"> Despesa </label>
               <input
-                type="text"
+                type="number"
                 name="despesa"
                 value={despesa}
                 onChange={(e) => setDespesa(e.target.value)}
@@ -234,7 +283,7 @@ function Solicitacao() {
                 <img src="" alt="" /> Salvar
               </button>
 
-              <button type="button">
+              <button type="button" onClick={limparCampos}>
                 <img src="" alt="" /> Deletar
               </button>
             </div>
@@ -264,7 +313,7 @@ function Solicitacao() {
           </thead>
 
           <tbody>
-            {dadosReembolso.map((item,index) => (
+            {dadosReembolso.map((item, index) => (
               <tr key={index}>
                 <td>
                   {" "}
@@ -292,6 +341,10 @@ function Solicitacao() {
             ))}
           </tbody>
         </table>
+
+       <button onClick={enviarParaAnalise}> Enviar para análise </button>
+
+
       </div>
     </>
   );
