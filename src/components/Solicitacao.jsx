@@ -71,12 +71,14 @@ function Solicitacao() {
   //CRIAR UMA FUNÇÃO PARA ENVIAR OS DADOS PARA O BANCO DE DADOS
   const [foiEnviado, setFoiEnviado] = useState(false); // Ele serve pra sabermos se o formulário já foi enviado
 
-  // Função assíncrona (async) para enviar os dados do reembolso para a API
+  // Função assíncrona (async) para enviar os dados do reembolso para a API. Permite que o código "espere" algo (como uma resposta do servidor), sem travar o resto do programa.
 
   const enviarParaAnalise = async () => {
     try {
       //aqui colocamos o que queremos 'tentar' fazer
 
+      //1º argumento é caminho da rota "/refunds/new" é uma rota no seu backend
+      //2º argumento é o que será enviado: dadosReembolso, os dados do formulário.
       // Faz uma requisição POST para o endpoint /refunds/new
       // Enviando junto os dados que estão salvos no estado "dadosReembolso"
       const response = await Api.post("/refunds/new", dadosReembolso);
@@ -85,7 +87,7 @@ function Solicitacao() {
 
       alert("Reembolso solicitado com sucesso!"); // Mostra um alerta avisando que deu certo
 
-      setFoiEnviado(true);
+      setFoiEnviado(true); //Ativando o estado "foiEnviado" para true
       // Atualiza o estado "foiEnviado" para true
       // Isso ativa o useEffect que está lá embaixo
     } catch (error) {
