@@ -22,7 +22,7 @@ function Solicitacao() {
   const [valorFaturado, setValorFaturado] = useState(""); // Estado para o campo valor faturado
   const [despesa, setDespesa] = useState(""); // Estado para o campo despesa
 
-  const [dadosReembolso, setDadosReembolso] = useState([]);
+  const [dadosReembolso, setDadosReembolso] = useState([]); //// Esse estado vai guardar os dados do formulário de reembolso
 
   //---FUNÇÃO PARA CAPTURAR OS VALORES DOS ESTADOS -----
 
@@ -49,7 +49,6 @@ function Solicitacao() {
   };
 
   //FUNÇÃO PARA LIMPAR OS CAMPOS DO FORMULÁRIO (INPUTS)
-
   const limparCampos = () => {
     setColaborador(""),
       setEmpresa(""),
@@ -70,31 +69,49 @@ function Solicitacao() {
   };
 
   //CRIAR UMA FUNÇÃO PARA ENVIAR OS DADOS PARA O BANCO DE DADOS
-  const [foiEnviado, setFoiEnviado] = useState(false); //Criando o estado
+  const [foiEnviado, setFoiEnviado] = useState(false); // Ele serve pra sabermos se o formulário já foi enviado
+
+  // Função assíncrona (async) para enviar os dados do reembolso para a API
 
   const enviarParaAnalise = async () => {
     try {
       //aqui colocamos o que queremos 'tentar' fazer
+
+      // Faz uma requisição POST para o endpoint /refunds/new
+      // Enviando junto os dados que estão salvos no estado "dadosReembolso"
       const response = await Api.post("/refunds/new", dadosReembolso);
 
-      console.log("Resposta da API", response);
-      alert("Reembolso solicitado com sucesso!");
+      console.log("Resposta da API", response); // Mostra no console a resposta da API (útil pra desenvolvedores testarem)
+
+      alert("Reembolso solicitado com sucesso!"); // Mostra um alerta avisando que deu certo
+
       setFoiEnviado(true);
+      // Atualiza o estado "foiEnviado" para true
+      // Isso ativa o useEffect que está lá embaixo
     } catch (error) {
-      //Se algo der ERRADO  no try, esse bloco é executado.
+      // Caso dê erro na hora de enviar, ele mostra o erro no console
       console.log("Erro ao enviar", error); //Mostra o erro se algo der errado
     }
   };
 
-//useEffect é como um vigia que fica observanto a variável foiEnviado
+  // Hook useEffect serve pra reagir a mudanças nos estados
 
-useEffect(()=>{
-  if(foiEnviado){
-//Se "foiEnviado" for true, significa que o reembolso foi enviado com sucesso
-setDadosReembolso([])/ //Volte ao estado inicial
-setFoiEnviado(false)// Isso é uma segurança para o hook useEffect para que ele não fique rodando toda hora.
-  }
-}, [foiEnviado]  )
+  useEffect(() => {
+    // Se "foiEnviado" for true (ou seja, depois do envio com sucesso)
+    if (foiEnviado) {
+      setDadosReembolso([]); // Limpa os dados do formulário, ou seja, zera o estado
+
+      setFoiEnviado(false);
+      // Coloca "foiEnviado" de volta para false
+      // Assim o useEffect não fica rodando pra sempre
+    }
+  }, [foiEnviado]); // Esse efeito só roda quando "foiEnviado" mudar
+
+  //Resumo simplificado:
+  //useState cria variáveis que guardam informações e atualizam a tela.
+  //A função enviarParaAnalise manda os dados pra um servidor (API).
+  // useEffect roda automaticamente quando a variável foiEnviado muda.
+  //Depois que os dados são enviados, ele limpa tudo pra poder começar de novo.
 
   return (
     <>
@@ -342,9 +359,7 @@ setFoiEnviado(false)// Isso é uma segurança para o hook useEffect para que ele
           </tbody>
         </table>
 
-       <button onClick={enviarParaAnalise}> Enviar para análise </button>
-
-
+        <button onClick={enviarParaAnalise}> Enviar para análise </button>
       </div>
     </>
   );
